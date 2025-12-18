@@ -1,4 +1,4 @@
-package emums;
+package enums;
 
 public enum OrderStatus {
     CREATED,

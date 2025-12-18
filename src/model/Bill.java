@@ -1,22 +1,20 @@
 package model;
 
-import javax.xml.transform.Source;
-
 public class Bill {
     private String billID;
-    private ServiceOrder orders;
+    private ServiceOrder order;
     private double amount;
 
-    public Bill(String billID, ServiceOrder orders) {
+    public Bill(String billID, ServiceOrder order) {
         this.billID = billID;
-        this.orders = orders;
-        amount=orders.getTotalAmount();
+        this.order = order;
+        amount= order.getTotalAmount();
     }
     public void printBill(){
         System.out.println("Bill ID: "+billID);
-        System.out.println("Customer: "+orders.getCustomer().getName());
-        System.out.println("Vehicle: "+orders.getVehicle().getVehicleNumber());
-        System.out.println("Total Amount: "+orders.getTotalAmount());
+        System.out.println("Customer: "+ order.getCustomer().getName());
+        System.out.println("Vehicle: "+ order.getVehicle().getVehicleNumber());
+        System.out.println("Total Amount: "+ order.getTotalAmount());
     }
 
 }

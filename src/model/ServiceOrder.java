@@ -1,6 +1,6 @@
 package model;
 
-import emums.OrderStatus;
+import enums.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ public class ServiceOrder {
     private String orderId;
     private Customer customer;
     private Vehicle vehicle;
-    private List<ServiceItems> services;
+    private List<ServiceItem> services;
     private OrderStatus orderStatus;
 
     public ServiceOrder(String orderId, Customer customer, Vehicle vehicle) {
@@ -20,18 +20,18 @@ public class ServiceOrder {
         this.orderStatus = OrderStatus.CREATED;
     }
 
-    public void addService(ServiceItems service){
+    public void addService(ServiceItem service){
         services.add(service);
     }
-    public void start(){
+    public void startOrder(){
         orderStatus=OrderStatus.IN_PROGRESS;
     }
-    public void complete(){
+    public void completeOrder(){
         orderStatus=OrderStatus.COMPLETED;
     }
     public double getTotalAmount(){
         double total=0.0;
-        for(ServiceItems s:services){
+        for(ServiceItem s:services){
             total+=s.getPrice();
         }
         return total;

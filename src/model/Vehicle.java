@@ -1,17 +1,17 @@
 package model;
 
-import emums.VehicleType;
+import enums.VehicleType;
 
 public class Vehicle {
     private String vehicleNumber;
     private Customer owner;
-    private String Brand;
-    VehicleType vehicleType;
+    private String brand;
+    private VehicleType vehicleType;
 
     public Vehicle(String vehicleNumber, Customer owner, String brand, VehicleType vehicleType) {
         this.vehicleNumber = vehicleNumber;
         this.owner = owner;
-        Brand = brand;
+        this.brand = brand;
         this.vehicleType = vehicleType;
     }
 
@@ -24,7 +24,7 @@ public class Vehicle {
     }
 
     public String getBrand() {
-        return Brand;
+        return brand;
     }
 
     public VehicleType getVehicleType() {

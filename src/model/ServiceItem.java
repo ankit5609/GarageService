@@ -1,11 +1,11 @@
 package model;
 
-public class ServiceItems {
+public class ServiceItem {
     private String serviceID;
     private String serviceName;
     private double price;
 
-    public ServiceItems(String serviceID, String serviceName, double price) {
+    public ServiceItem(String serviceID, String serviceName, double price) {
         this.serviceID = serviceID;
         this.serviceName = serviceName;
         this.price = price;

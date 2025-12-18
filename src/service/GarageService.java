@@ -14,7 +14,7 @@ public class GarageService {
     private Map<String, ServiceOrder> serviceOrder=new HashMap<>();
 
     public void addCustomer(Customer customer){
-        customerList.put(customer.getcID(),customer);
+        customerList.put(customer.getCustomerID(),customer);
     }
     public void addVehicle(Vehicle vehicle){
         vehicleList.put(vehicle.getVehicleNumber(),vehicle);
