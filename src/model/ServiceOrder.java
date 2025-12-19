@@ -24,10 +24,20 @@ public class ServiceOrder {
         services.add(service);
     }
     public void startOrder(){
-        orderStatus=OrderStatus.IN_PROGRESS;
+        if(orderStatus==OrderStatus.CREATED) {
+            orderStatus = OrderStatus.IN_PROGRESS;
+        }
+        else {
+            throw new IllegalStateException("Warning: First create an order");
+        }
     }
     public void completeOrder(){
-        orderStatus=OrderStatus.COMPLETED;
+        if(orderStatus==OrderStatus.IN_PROGRESS) {
+            orderStatus = OrderStatus.COMPLETED;
+        }
+        else {
+            throw new IllegalStateException("Warning: Order is not yet Started");
+        }
     }
     public double getTotalAmount(){
         double total=0.0;
