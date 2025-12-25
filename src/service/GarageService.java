@@ -28,15 +28,6 @@ public class GarageService {
             throw new DuplicateEntityException("ERROR: Vehicle with Vehicle id="+vehicle.getVehicleNumber()+" already exist");
         else vehicleList.put(vehicle.getVehicleNumber(),vehicle);
     }
-//    public ServiceOrder prepareOrder(String orderId, String customerId, String vehicleNumber, ServiceItem services[]){
-//        ServiceOrder order=createOrder(orderId,customerId,vehicleNumber);
-//        for(ServiceItem service : services){
-//            order.addService(service);
-//        }
-//        order.startOrder();
-//        order.completeOrder();
-//        return order;
-//    }
 
     public ServiceOrder createOrder(String orderId,String customerID,String vehicleNumber){
         if(serviceOrder.containsKey(orderId)) throw new IllegalArgumentException("WARNING: Order already exist");
@@ -55,8 +46,11 @@ public class GarageService {
         return order;
     }
 
-//    public void deleteOrder()
-
+    public Customer getCustomer(String ownerID){
+        if(!customerList.containsKey(ownerID))
+            throw new CustomerNotFoundException("ERROR: This customer is not registered.");
+        else return customerList.get(ownerID);
+    }
     public ServiceOrder getOrder(String orderId){
         return serviceOrder.get(orderId);
     }

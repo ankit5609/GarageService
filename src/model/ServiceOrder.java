@@ -43,14 +43,20 @@ public class ServiceOrder {
         }
     }
 
-    public void updateService(ServiceItem service){
+    public void updateService(ServiceItem updatedService){
         if(orderStatus!=OrderStatus.CREATED)
             throw new InvalidOrderStateException("ERROR: Cannot add services after order has started");
-        for(ServiceItem serviceLoop :services){
-            if(serviceLoop.getServiceID().equals(service.getServiceID()))
-                throw new DuplicateEntityException("Service:"+service.getServiceID()+" already added to order");
+        boolean updated=false;
+        for (int i = 0; i < services.size(); i++) {
+            ServiceItem existing = services.get(i);
+
+            if (existing.getServiceID().equals(updatedService.getServiceID())) {
+                services.set(i, updatedService); // REPLACE
+                updated = true;
+                break;
+            }
         }
-        services.add(service);
+        if(updated) throw new DuplicateEntityException("ERROR: Service:"+updatedService.getServiceID()+" not present in order");
     }
     public void startOrder(){
         if(orderStatus==OrderStatus.CREATED) {
