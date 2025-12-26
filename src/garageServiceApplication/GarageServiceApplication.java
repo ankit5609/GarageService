@@ -57,7 +57,7 @@ public class GarageServiceApplication {
                         String cID = sc.nextLine();
                         System.out.print("Vehicle Number: ");
                         String vNumber = sc.nextLine();
-                        currentOrder = garageService.createOrder("S" + orderID, cID, vNumber);
+                        currentOrder = garageService.createOrder("OD" + orderID, cID, vNumber);
                         System.out.println("Order Created with Order id:" + ("OD" + orderID++));
                         break;
                     case 4:

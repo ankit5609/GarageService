@@ -3,6 +3,7 @@ package model;
 import enums.OrderStatus;
 import exceptions.DuplicateEntityException;
 import exceptions.InvalidOrderStateException;
+import exceptions.ServiceNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ServiceOrder {
                 break;
             }
         }
-        if(!updated) throw new DuplicateEntityException("ERROR: Service:"+updatedService.getServiceID()+" not present in order");
+        if(!updated) throw new ServiceNotFoundException("ERROR: Service:"+updatedService.getServiceID()+" not present in order");
     }
 
     public void cancelOrder(){
@@ -119,7 +120,7 @@ public class ServiceOrder {
     }
 
     public List<OrderServiceItem> getServiceList(){
-        return services;
+        return new ArrayList<>(services);
     }
 //    public void setOrderStatus(OrderStatus orderStatus){
 //        this.orderStatus=orderStatus;
