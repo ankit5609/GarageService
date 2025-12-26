@@ -1,11 +1,8 @@
 package service;
 
-import exceptions.CustomerNotFoundException;
-import exceptions.DuplicateEntityException;
-import exceptions.OwnershipMismatchException;
-import exceptions.VehicleNotFoundException;
+import enums.OrderStatus;
+import exceptions.*;
 import model.Customer;
-import model.ServiceItem;
 import model.ServiceOrder;
 import model.Vehicle;
 

@@ -11,7 +11,7 @@ public class ServiceOrder {
     private String orderId;
     private Customer customer;
     private Vehicle vehicle;
-    private List<ServiceItem> services;
+    private List<OrderServiceItem> services;
     private OrderStatus orderStatus;
 
     public ServiceOrder(String orderId, Customer customer, Vehicle vehicle) {
@@ -22,43 +22,59 @@ public class ServiceOrder {
         this.orderStatus = OrderStatus.CREATED;
     }
 
-    public void addService(ServiceItem service){
+    public void addService(ServiceItem service,int quantity){
+        if(orderStatus==OrderStatus.CANCELLED)
+            throw new InvalidOrderStateException("ERROR: Order is cancelled, cannot add service");
         if(orderStatus!=OrderStatus.CREATED)
             throw new InvalidOrderStateException("ERROR: Cannot add services after order has started");
-        for(ServiceItem serviceLoop :services){
-            if(serviceLoop.getServiceID().equals(service.getServiceID()))
+        for(OrderServiceItem serviceLoop :services){
+            if(serviceLoop.getServiceItem().getServiceID().equals(service.getServiceID()))
                 throw new DuplicateEntityException("Service:"+service.getServiceID()+" already added to order");
         }
-        services.add(service);
+        services.add(new OrderServiceItem(service,quantity));
     }
 
     public void deleteService(String serviceID){
+        if(orderStatus==OrderStatus.CANCELLED)
+            throw new InvalidOrderStateException("ERROR: Order is cancelled, cannot delete service");
         if(orderStatus!=OrderStatus.CREATED)
             throw new InvalidOrderStateException("ERROR: Cannot modify services after order has started.");
         boolean removed=services.removeIf(
-                service -> service.getServiceID().equals(serviceID)
+                service -> service.getServiceItem().getServiceID().equals(serviceID)
         );
         if (!removed) {
             throw new IllegalArgumentException("Service not found in order: " + serviceID);
         }
     }
 
-    public void updateService(ServiceItem updatedService){
+    public void updateService(ServiceItem updatedService,int updateQuantity){
+        if(updateQuantity<=0)
+            throw new IllegalArgumentException("ERROR: Quantity must be greater than 0");
+        if(orderStatus==OrderStatus.CANCELLED)
+            throw new InvalidOrderStateException("ERROR: Order is cancelled, cannot update service");
         if(orderStatus!=OrderStatus.CREATED)
             throw new InvalidOrderStateException("ERROR: Cannot add services after order has started");
         boolean updated=false;
         for (int i = 0; i < services.size(); i++) {
-            ServiceItem existing = services.get(i);
+            ServiceItem existing = services.get(i).getServiceItem();
 
             if (existing.getServiceID().equals(updatedService.getServiceID())) {
-                services.set(i, updatedService); // REPLACE
+                services.set(i, new OrderServiceItem(updatedService,updateQuantity));
                 updated = true;
                 break;
             }
         }
-        if(updated) throw new DuplicateEntityException("ERROR: Service:"+updatedService.getServiceID()+" not present in order");
+        if(!updated) throw new DuplicateEntityException("ERROR: Service:"+updatedService.getServiceID()+" not present in order");
+    }
+
+    public void cancelOrder(){
+        if(orderStatus!=OrderStatus.CREATED)
+            throw new InvalidOrderStateException("ERROR: Order started,cannot be cancelled");
+        orderStatus=OrderStatus.CANCELLED;
     }
     public void startOrder(){
+        if(orderStatus==OrderStatus.CANCELLED)
+            throw new InvalidOrderStateException("ERROR: Order is cancelled, cannot start order");
         if(orderStatus==OrderStatus.CREATED) {
             if(services.isEmpty())
                 throw new InvalidOrderStateException("ERROR: Cannot start order without adding services");
@@ -69,6 +85,8 @@ public class ServiceOrder {
         }
     }
     public void completeOrder(){
+        if(orderStatus==OrderStatus.CANCELLED)
+            throw new InvalidOrderStateException("ERROR: Order is already cancelled.");
         if(orderStatus==OrderStatus.IN_PROGRESS) {
             orderStatus = OrderStatus.COMPLETED;
         }
@@ -78,8 +96,8 @@ public class ServiceOrder {
     }
     public double getTotalAmount(){
         double total=0.0;
-        for(ServiceItem s:services){
-            total+=s.getPrice();
+        for(OrderServiceItem s:services){
+            total+=s.getTotalPrice();
         }
         return total;
     }
@@ -99,4 +117,11 @@ public class ServiceOrder {
     public OrderStatus getOrderStatus(){
         return orderStatus;
     }
+
+    public List<OrderServiceItem> getServiceList(){
+        return services;
+    }
+//    public void setOrderStatus(OrderStatus orderStatus){
+//        this.orderStatus=orderStatus;
+//    }
 }
