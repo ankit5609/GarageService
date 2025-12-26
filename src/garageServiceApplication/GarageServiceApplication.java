@@ -61,6 +61,8 @@ public class GarageServiceApplication {
                         System.out.println("Order Created with Order id:" + ("OD" + orderID++));
                         break;
                     case 4:
+                        if(currentOrder==null)
+                            throw new RuntimeException("ERROR: No Order created.");
                         System.out.print("Service Id: ");
                         String sID = sc.nextLine();
                         System.out.print("Service Name: ");
