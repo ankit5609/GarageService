@@ -1,6 +1,7 @@
 package dao;
 
 import enums.VehicleType;
+import exceptions.OwnershipMismatchException;
 import model.Customer;
 import model.Vehicle;
 import util.DBConnection;
@@ -24,7 +25,7 @@ public class VehicleDAO {
             ps.executeUpdate();
         }
         catch (SQLException e){
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -37,6 +38,8 @@ public class VehicleDAO {
             ResultSet rs=ps.executeQuery();
             if(!rs.next()) return null;
 
+            if(!rs.getString("customer_id").equals(customer.getCustomerID()))
+                throw new OwnershipMismatchException("Vehicle " + vehicleNumber + " does not belong to customer " + customer.getCustomerID());
             return new Vehicle(rs.getString("vehicleNumber"),
                     customer,
                     rs.getString("brand"),
@@ -44,10 +47,17 @@ public class VehicleDAO {
             );
         }
         catch (SQLException e){
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
     public boolean existByVehicleNumber(String vehicleNumber){
-        return getByVehicleNumber(vehicleNumber, new Customer("", "", "")) != null;
+        String sql="SELECT 1 FROM vehicle WHERE vehicleNumber=?";
+        try(Connection con=DBConnection.getConnection();
+            PreparedStatement ps=con.prepareStatement(sql)){
+            ps.setString(1,vehicleNumber);
+            return ps.executeQuery().next();
+        } catch(Exception e){
+            throw new RuntimeException(e);
+        }
     }
 }

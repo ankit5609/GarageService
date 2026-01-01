@@ -14,7 +14,7 @@ public class OrderServiceItemDAO {
 
     public String generateServiceItemId(){
         String select="SELECT next_value FROM id_sequence WHERE name='ServiceItem' FOR UPDATE";
-        String update="UPDATE id_sequence next_value=? WHERE name='ServiceItem'";
+        String update="UPDATE id_sequence SET next_value=? WHERE name='ServiceItem'";
         try(Connection con=DBConnection.getConnection()){
             con.setAutoCommit(false);
             int next;
@@ -31,7 +31,7 @@ public class OrderServiceItemDAO {
             con.commit();
             return "S"+next;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
     public void saveService(String orderID, OrderServiceItem serviceItem){
@@ -46,7 +46,7 @@ public class OrderServiceItemDAO {
             ps.executeUpdate();
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public void updateService(String orderId, OrderServiceItem serviceItem){
@@ -61,7 +61,7 @@ public class OrderServiceItemDAO {
             ps.executeUpdate();
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public void deleteItem(String orderId,String serviceId){
@@ -77,7 +77,7 @@ public class OrderServiceItemDAO {
             }
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -99,7 +99,7 @@ public class OrderServiceItemDAO {
             return services;
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
 }

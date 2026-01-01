@@ -12,7 +12,7 @@ public class CustomerDAO {
 
     public String generateCustomerId(){
         String select="SELECT next_value FROM id_sequence WHERE name='Customer' FOR UPDATE";
-        String update="UPDATE id_sequence next_value=? WHERE name='Customer'";
+        String update="UPDATE id_sequence SET next_value=? WHERE name='Customer'";
 
         try(Connection con=DBConnection.getConnection()){
             con.setAutoCommit(false);
@@ -30,7 +30,7 @@ public class CustomerDAO {
             con.commit();
             return "C"+next;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
     public void save(Customer customer){
@@ -44,7 +44,7 @@ public class CustomerDAO {
             ps.executeUpdate();
         }
         catch (SQLException e){
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -63,7 +63,7 @@ public class CustomerDAO {
 
         }
         catch (SQLException e){
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

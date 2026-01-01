@@ -38,8 +38,6 @@ public class GarageService {
         if(vehicle==null){
             throw new VehicleNotFoundException("ERROR: Vehicle with vehicle number=\""+vehicleNumber+"\" doesn't exist.");
         }
-        if(!vehicle.getOwner().getCustomerID().equals(customer.getCustomerID()))
-            throw new OwnershipMismatchException("Vehicle " + vehicleNumber + " does not belong to customer " + customerID);
         ServiceOrder order=new ServiceOrder(orderId,customer,vehicle);
         serviceOrderDAO.save(order);
     }
@@ -86,7 +84,7 @@ public class GarageService {
     }
     public ServiceOrder getOrder(String order_id){
         if(!serviceOrderDAO.existsById(order_id))
-            throw new OrderNotFound("ERROR: This order does not exist,");
+            throw new OrderNotFound("ERROR: This order does not exist.");
 
         ServiceOrder tempOrder=serviceOrderDAO.findById(order_id,
               customerDAO.findById(serviceOrderDAO.getCustomerId(order_id)),
@@ -96,8 +94,7 @@ public class GarageService {
         List<OrderServiceItem> items=orderServiceItemDAO.findByOrderId(order_id);
 
         for(OrderServiceItem item : items){
-            tempOrder.addService(item.getServiceItem(),
-                                    item.getQuantity());
+            tempOrder.loadService(item);
         }
         return tempOrder;
     }
@@ -108,5 +105,7 @@ public class GarageService {
     public  String generateOrderId(){
         return serviceOrderDAO.generateServiceId();
     }
-//    public String generate
+    public String generateServiceItemId(){
+        return orderServiceItemDAO.generateServiceItemId();
+    }
 }

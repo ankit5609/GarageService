@@ -122,7 +122,11 @@ public class ServiceOrder {
     public List<OrderServiceItem> getServiceList(){
         return new ArrayList<>(services);
     }
-//    public void setOrderStatus(OrderStatus orderStatus){
-//        this.orderStatus=orderStatus;
-//    }
+    public void setOrderStatus(OrderStatus status){
+        this.orderStatus = status;
+    }
+    public void loadService(OrderServiceItem item) {
+        services.add(item);
+    }
+
 }

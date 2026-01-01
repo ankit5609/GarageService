@@ -14,7 +14,7 @@ public class ServiceOrderDAO {
 
     public String generateServiceId(){
         String select="SELECT next_value FROM id_sequence WHERE name='ServiceOrder' FOR UPDATE";
-        String update="UPDATE id_sequence next_value=? WHERE name='ServiceOrder'";
+        String update="UPDATE id_sequence SET next_value=? WHERE name='ServiceOrder'";
         try(Connection con=DBConnection.getConnection()){
             con.setAutoCommit(false);
             int next;
@@ -31,7 +31,7 @@ public class ServiceOrderDAO {
             con.commit();
             return "OD"+next;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
     public void save(ServiceOrder order){
@@ -45,7 +45,7 @@ public class ServiceOrderDAO {
             ps.executeUpdate();
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public boolean existsById(String orderId){
@@ -58,7 +58,7 @@ public class ServiceOrderDAO {
             else return true;
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public OrderStatus findStatusById(String orderId){
@@ -72,7 +72,7 @@ public class ServiceOrderDAO {
             return OrderStatus.valueOf(rs.getString("orderStatus"));
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public ServiceOrder findById(String orderId,Customer customer,Vehicle vehicle){
@@ -85,17 +85,11 @@ public class ServiceOrderDAO {
 
             ServiceOrder order=new ServiceOrder(orderId,customer,vehicle);
             OrderStatus tempStatus=OrderStatus.valueOf(rs.getString("orderStatus"));
-            if(tempStatus==OrderStatus.COMPLETED){
-                order.startOrder();
-                order.completeOrder();
-            } else if (tempStatus==OrderStatus.IN_PROGRESS) {
-                order.startOrder();
-            }
-            else if(tempStatus==OrderStatus.CANCELLED) order.cancelOrder();
+            order.setOrderStatus(OrderStatus.valueOf(rs.getString("orderStatus")));
             return order;
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public void updateStatus(String orderId, OrderStatus orderStatus){
@@ -108,7 +102,7 @@ public class ServiceOrderDAO {
 
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public String getCustomerId(String orderId){
@@ -122,7 +116,7 @@ public class ServiceOrderDAO {
             return rs.getString("customer_id");
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
     public String getVehicleNumber(String orderId){
@@ -136,7 +130,7 @@ public class ServiceOrderDAO {
             return rs.getString("vehicleNumber");
         }
         catch (Exception e){
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
 }
