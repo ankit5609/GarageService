@@ -11,8 +11,7 @@ public class GarageServiceApplication {
 
         GarageService garageService=new GarageService();
         Scanner sc=new Scanner(System.in);
-        ServiceOrder currentOrder=null;
-        int customerID=1, orderID =1;
+        String orderId,cID,sID;
         while (true){
             System.out.println("-------------GARAGE SERVICE MENU-------------");
             System.out.println("1. Add Customer");
@@ -36,8 +35,9 @@ public class GarageServiceApplication {
                         String name = sc.nextLine();
                         System.out.print("Phone: ");
                         String ph = sc.nextLine();
-                        garageService.addCustomer(new Customer("C" + customerID, name, ph));
-                        System.out.println("Customer added with customer ID:"+("C" + customerID++));
+                        cID= garageService.generateCustomerId();
+                        garageService.addCustomer(new Customer(cID, name, ph));
+                        System.out.println("Customer added with customer ID:"+cID);
                         break;
                     case 2:
                         System.out.print("Vehicle Number: ");
@@ -47,24 +47,24 @@ public class GarageServiceApplication {
                         System.out.print("Brand: ");
                         String brand = sc.nextLine();
                         System.out.print("Type (BIKE/CAR): ");
-                        VehicleType type = VehicleType.valueOf(sc.nextLine());
+                        VehicleType type = VehicleType.valueOf(sc.nextLine().toUpperCase());
                         Customer owner = garageService.getCustomer(ownerID);
                         garageService.addVehicle(new Vehicle(vNum, owner, brand, type));
                         System.out.println("Vehicle added");
                         break;
                     case 3:
                         System.out.print("Customer id: ");
-                        String cID = sc.nextLine();
+                        cID = sc.nextLine();
                         System.out.print("Vehicle Number: ");
                         String vNumber = sc.nextLine();
-                        currentOrder = garageService.createOrder("OD" + orderID, cID, vNumber);
-                        System.out.println("Order Created with Order id:" + ("OD" + orderID++));
+                        orderId= garageService.generateOrderId();
+                        garageService.createOrder(orderId, cID, vNumber);
+                        System.out.println("Order Created with Order id:" + (orderId));
                         break;
                     case 4:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
-                        System.out.print("Service Id: ");
-                        String sID = sc.nextLine();
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
+                        sID = garageService.generateServiceItemId();
                         System.out.print("Service Name: ");
                         String sName = sc.nextLine();
                         System.out.print("Price: ");
@@ -72,23 +72,24 @@ public class GarageServiceApplication {
                         System.out.print("Quantity: ");
                         int quantity=sc.nextInt();
                         sc.nextLine();
-                        currentOrder.addService(new ServiceItem(sID, sName, price),quantity);
+                        garageService.addServiceToOrder(orderId,
+                                new ServiceItem(sID,sName,price),quantity);
                         System.out.println("Service added");
                         break;
                     case 5:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
                         System.out.print("Service ID to remove: ");
-                        String sid = sc.nextLine();
-                        currentOrder.deleteService(sid);
+                        sID = sc.nextLine();
+                       garageService.removeServiceFromOrder(orderId,sID);
                         System.out.println("Service removed");
                         break;
                     case 6:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
                         System.out.println("To Update: ");
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
                         System.out.print("Service Id: ");
-                        String siD = sc.nextLine();
+                        sID = sc.nextLine();
                         System.out.print("Service Name: ");
                         String Sname = sc.nextLine();
                         System.out.print("Price: ");
@@ -96,31 +97,33 @@ public class GarageServiceApplication {
                         System.out.print("Quantity: ");
                         int quantitY=sc.nextInt();
                         sc.nextLine();
-                        currentOrder.updateService(new ServiceItem(siD, Sname, Price),quantitY);
+                        garageService.updateServiceInOrder(orderId,
+                                new ServiceItem(sID,Sname,Price),quantitY);
                         System.out.println("Service Updated");
                         break;
                     case 7:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
-                        currentOrder.startOrder();
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
+                        garageService.startOrder(orderId);
                         System.out.println("Order started");
                         break;
                     case 8:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
-                        currentOrder.completeOrder();
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
+                        garageService.completeOrder(orderId);
                         System.out.println("Order completed");
                         break;
                     case 9:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
-                        currentOrder.cancelOrder();
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
+                        garageService.cancelOrder(orderId);
                         System.out.println("Order cancelled.");
                         break;
 
                     case 10:
-                        if(currentOrder==null)
-                            throw new RuntimeException("ERROR: No Order created.");
+                        System.out.print("Order ID: ");
+                        orderId=sc.nextLine();
+                        ServiceOrder currentOrder=garageService.getOrder(orderId);
                         Bill bill = new Bill("B" + currentOrder.getOrderId(), currentOrder);
                         bill.printBill();
                         break;
@@ -129,7 +132,7 @@ public class GarageServiceApplication {
                         sc.close();
                         return;
                     default:
-                        System.out.println("Enter valid choice from 1-10");
+                        System.out.println("Enter valid choice from 1-11");
                 }
             }
             catch(RuntimeException e){

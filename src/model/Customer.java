@@ -1,18 +1,18 @@
 package model;
 
 public class Customer {
-    private String customerID;
+    private String customer_ID;
     private String name;
-    private String phoneNumber;
+    private String phone_Number;
 
-    public Customer(String customerID, String name, String phoneNumber) {
-        this.customerID = customerID;
+    public Customer(String customer_ID, String name, String phone_Number) {
+        this.customer_ID = customer_ID;
         this.name = name;
-        this.phoneNumber = phoneNumber;
+        this.phone_Number = phone_Number;
     }
 
     public String getCustomerID() {
-        return customerID;
+        return customer_ID;
     }
 
     public String getName() {
@@ -20,6 +20,6 @@ public class Customer {
     }
 
     public String getPhoneNumber() {
-        return phoneNumber;
+        return phone_Number;
     }
 }
