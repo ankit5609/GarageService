@@ -13,10 +13,10 @@ import java.sql.SQLException;
 
 public class VehicleDAO {
 
-    public void save(Vehicle vehicle){
+    public void save(Connection con,Vehicle vehicle){
         String sql="INSERT INTO vehicle VALUES (?,?,?,?)";
 
-        try(Connection con= DBConnection.getConnection();
+        try(
          PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,vehicle.getVehicleNumber());
             ps.setString(2,vehicle.getOwner().getCustomerID());
@@ -29,7 +29,7 @@ public class VehicleDAO {
         }
     }
 
-    public Vehicle getByVehicleNumber(String vehicleNumber, Customer customer){
+    public String getVehicleCustomerId(String vehicleNumber){
         String sql="SELECT * FROM vehicle WHERE vehicleNumber=?";
 
         try(Connection con=DBConnection.getConnection();
@@ -37,9 +37,38 @@ public class VehicleDAO {
             ps.setString(1, vehicleNumber);
             ResultSet rs=ps.executeQuery();
             if(!rs.next()) return null;
+            else return rs.getString("customer_id");
+        }
+        catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+    public Vehicle getVehicle(String vehicleNumber, Customer customer){
+        String sql="SELECT * FROM vehicle WHERE vehicleNumber=?";
 
-            if(!rs.getString("customer_id").equals(customer.getCustomerID()))
-                throw new OwnershipMismatchException("Vehicle " + vehicleNumber + " does not belong to customer " + customer.getCustomerID());
+        try(Connection con=DBConnection.getConnection();
+            PreparedStatement ps=con.prepareStatement(sql)){
+            ps.setString(1, vehicleNumber);
+            ResultSet rs=ps.executeQuery();
+            if(!rs.next()) return null;
+            return new Vehicle(rs.getString("vehicleNumber"),
+                    customer,
+                    rs.getString("brand"),
+                    VehicleType.valueOf(rs.getString("vehicleType"))
+            );
+        }
+        catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+    public Vehicle getVehicle(Connection con,String vehicleNumber, Customer customer){
+        String sql="SELECT * FROM vehicle WHERE vehicleNumber=?";
+
+        try(
+            PreparedStatement ps=con.prepareStatement(sql)){
+            ps.setString(1, vehicleNumber);
+            ResultSet rs=ps.executeQuery();
+            if(!rs.next()) return null;
             return new Vehicle(rs.getString("vehicleNumber"),
                     customer,
                     rs.getString("brand"),
