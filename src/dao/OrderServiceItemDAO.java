@@ -12,31 +12,35 @@ import java.util.List;
 
 public class OrderServiceItemDAO {
 
-    public String generateServiceItemId(){
-        String select="SELECT next_value FROM id_sequence WHERE name='ServiceItem' FOR UPDATE";
-        String update="UPDATE id_sequence SET next_value=? WHERE name='ServiceItem'";
-        try(Connection con=DBConnection.getConnection()){
-            con.setAutoCommit(false);
-            int next;
+    public int getNextId(Connection con, String name) {
+        String select="SELECT next_value FROM id_sequence WHERE name=? FOR UPDATE";
+
+
             try(PreparedStatement ps=con.prepareStatement(select)){
+                ps.setString(1,name);
                 ResultSet rs=ps.executeQuery();
                 rs.next();
-                next=rs.getInt("next_value");
+                return rs.getInt("next_value");
             }
-            next+=1;
-            try(PreparedStatement ps=con.prepareStatement(update)){
-                ps.setInt(1,next);
-                ps.executeUpdate();
+            catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            con.commit();
-            return "S"+next;
-        } catch (Exception e) {
+
+    }
+    public void updateNextId(Connection con, String name, int next){
+        String update="UPDATE id_sequence SET next_value=? WHERE name=?";
+        try(PreparedStatement ps=con.prepareStatement(update)){
+            ps.setInt(1,next);
+            ps.setString(2,name);
+            ps.executeUpdate();
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    public void saveService(String orderID, OrderServiceItem serviceItem){
+    public void saveService(Connection con,String orderID, OrderServiceItem serviceItem){
         String sql="INSERT INTO order_serviceItem VALUES(?,?,?,?,?)";
-        try (Connection con= DBConnection.getConnection();
+        try (
              PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,orderID);
             ps.setString(2,serviceItem.getServiceItem().getServiceID());
@@ -49,9 +53,9 @@ public class OrderServiceItemDAO {
             throw new IllegalArgumentException(e);
         }
     }
-    public void updateService(String orderId, OrderServiceItem serviceItem){
+    public void updateService(Connection con, String orderId, OrderServiceItem serviceItem){
         String sql="UPDATE order_serviceItem SET serviceName=?,price=?,quantity=? WHERE order_id=? AND serviceID=?";
-        try (Connection con= DBConnection.getConnection();
+        try (
              PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,serviceItem.getServiceItem().getServiceName());
             ps.setDouble(2,serviceItem.getServiceItem().getPrice());
@@ -64,9 +68,9 @@ public class OrderServiceItemDAO {
             throw new IllegalArgumentException(e);
         }
     }
-    public void deleteItem(String orderId,String serviceId){
+    public void deleteItem(Connection con, String orderId,String serviceId){
         String sql="DELETE FROM order_serviceItem WHERE order_id=? AND serviceID=?";
-        try (Connection con= DBConnection.getConnection();
+        try (
              PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,orderId);
             ps.setString(2,serviceId);
@@ -85,6 +89,27 @@ public class OrderServiceItemDAO {
         String sql="SELECT * FROM order_serviceItem WHERE order_id=?";
         List<OrderServiceItem> services=new ArrayList<>();
         try (Connection con= DBConnection.getConnection();
+             PreparedStatement ps=con.prepareStatement(sql)){
+            ps.setString(1,orderId);
+            ResultSet rs=ps.executeQuery();
+
+            while(rs.next()){
+                ServiceItem serviceItem=new ServiceItem(rs.getString("serviceID"),
+                        rs.getString("serviceName"),
+                        rs.getDouble("price"));
+
+                services.add(new OrderServiceItem(serviceItem,rs.getInt("quantity")));
+            }
+            return services;
+        }
+        catch (Exception e){
+            throw new IllegalArgumentException(e);
+        }
+    }
+    public List<OrderServiceItem> findByOrderId(Connection con,String orderId){
+        String sql="SELECT * FROM order_serviceItem WHERE order_id=?";
+        List<OrderServiceItem> services=new ArrayList<>();
+        try (
              PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,orderId);
             ResultSet rs=ps.executeQuery();
