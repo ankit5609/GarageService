@@ -5,6 +5,7 @@ import exceptions.DuplicateEntityException;
 import exceptions.InvalidOrderStateException;
 import exceptions.ServiceNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,13 +15,32 @@ public class ServiceOrder {
     private Vehicle vehicle;
     private List<OrderServiceItem> services;
     private OrderStatus orderStatus;
+    private LocalDateTime created_at;
+    private LocalDateTime started_at;
+    private LocalDateTime completed_at;
+    private LocalDateTime cancelled_at;
 
-    public ServiceOrder(String orderId, Customer customer, Vehicle vehicle) {
+    public ServiceOrder(String orderId, Customer customer, Vehicle vehicle,
+                        OrderStatus orderStatus,
+                        LocalDateTime created_at,LocalDateTime started_at,
+                        LocalDateTime completed_at, LocalDateTime cancelled_at) {
         this.orderId = orderId;
         this.customer = customer;
         this.vehicle = vehicle;
+        this.orderStatus=orderStatus;
         this.services = new ArrayList<>();
-        this.orderStatus = OrderStatus.CREATED;
+        this.orderStatus = orderStatus;
+        this.created_at=created_at;
+        this.started_at=started_at;
+        this.completed_at=completed_at;
+        this.cancelled_at=cancelled_at;
+    }
+
+    public static ServiceOrder createNew(String order_id,Customer customer,Vehicle vehicle){
+        return new ServiceOrder(
+                order_id,customer,vehicle,OrderStatus.CREATED,
+                LocalDateTime.now(),null,null,null
+        );
     }
 
     public void addService(ServiceItem service,int quantity){
@@ -69,9 +89,12 @@ public class ServiceOrder {
     }
 
     public void cancelOrder(){
-        if(orderStatus!=OrderStatus.CREATED)
+        if(orderStatus==OrderStatus.COMPLETED)
+            throw new InvalidOrderStateException("ERROR: Order already Completed.");
+        else if(orderStatus!=OrderStatus.CREATED)
             throw new InvalidOrderStateException("ERROR: Order started,cannot be cancelled");
         orderStatus=OrderStatus.CANCELLED;
+        cancelled_at=LocalDateTime.now();
     }
     public void startOrder(){
         if(orderStatus==OrderStatus.CANCELLED)
@@ -80,6 +103,8 @@ public class ServiceOrder {
             if(services.isEmpty())
                 throw new InvalidOrderStateException("ERROR: Cannot start order without adding services");
             orderStatus = OrderStatus.IN_PROGRESS;
+            started_at=LocalDateTime.now();
+
         }
         else {
             throw new InvalidOrderStateException("Warning: Order can only be started from CREATED state");
@@ -90,6 +115,7 @@ public class ServiceOrder {
             throw new InvalidOrderStateException("ERROR: Order is already cancelled.");
         if(orderStatus==OrderStatus.IN_PROGRESS) {
             orderStatus = OrderStatus.COMPLETED;
+            completed_at=LocalDateTime.now();
         }
         else {
             throw new InvalidOrderStateException("Warning: Order can only be completed from IN_PROGRESS state");
@@ -115,10 +141,33 @@ public class ServiceOrder {
         return vehicle;
     }
 
+    public void setStarted_at(LocalDateTime started_at) {
+        this.started_at = started_at;
+    }
+
+    public void setCompleted_at(LocalDateTime completed_at) {
+        this.completed_at = completed_at;
+    }
+
+    public void setCancelled_at(LocalDateTime cancelled_at) {
+        this.cancelled_at = cancelled_at;
+    }
+
     public OrderStatus getOrderStatus(){
         return orderStatus;
     }
-
+    public LocalDateTime getCreatedTime(){
+        return created_at;
+    }
+    public LocalDateTime getStartedTime(){
+        return started_at;
+    }
+    public LocalDateTime getCompletedTime(){
+        return completed_at;
+    }
+    public LocalDateTime getCancelledTime(){
+        return cancelled_at;
+    }
     public List<OrderServiceItem> getServiceList(){
         return new ArrayList<>(services);
     }
