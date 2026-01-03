@@ -9,6 +9,7 @@ import util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 
 public class ServiceOrderDAO {
 
@@ -39,13 +40,18 @@ public class ServiceOrderDAO {
 
 
     public void save(Connection con,ServiceOrder order){
-        String sql="INSERT INTO service_order VALUES(?,?,?,?)";
+        String sql = """
+                INSERT INTO service_order
+                (order_id, customer_id, vehicleNumber, orderStatus, created_at)
+                VALUES (?,?,?,?,?)""";
+
         try (
              PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,order.getOrderId());
             ps.setString(2,order.getCustomer().getCustomerID());
             ps.setString(3,order.getVehicle().getVehicleNumber());
             ps.setString(4,order.getOrderStatus().name());
+            ps.setTimestamp(5, Timestamp.valueOf(order.getCreatedTime()));
             ps.executeUpdate();
         }
         catch (Exception e){
@@ -100,9 +106,12 @@ public class ServiceOrderDAO {
             ResultSet rs=ps.executeQuery();
             if(!rs.next()) return null;
 
-            ServiceOrder order=new ServiceOrder(orderId,customer,vehicle);
-            OrderStatus tempStatus=OrderStatus.valueOf(rs.getString("orderStatus"));
-            order.setOrderStatus(OrderStatus.valueOf(rs.getString("orderStatus")));
+            ServiceOrder order=new ServiceOrder(orderId,customer,vehicle,
+                    OrderStatus.valueOf(rs.getString("orderStatus")),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    (rs.getTimestamp("started_at")!=null)?rs.getTimestamp("started_at").toLocalDateTime():null,
+                    (rs.getTimestamp("completed_at")!=null)?rs.getTimestamp("completed_at").toLocalDateTime():null,
+                    (rs.getTimestamp("cancelled_at")!=null)?rs.getTimestamp("cancelled_at").toLocalDateTime():null);
             return order;
         }
         catch (Exception e){
@@ -117,21 +126,32 @@ public class ServiceOrderDAO {
             ResultSet rs=ps.executeQuery();
             if(!rs.next()) return null;
 
-            ServiceOrder order=new ServiceOrder(orderId,customer,vehicle);
-            OrderStatus tempStatus=OrderStatus.valueOf(rs.getString("orderStatus"));
-            order.setOrderStatus(OrderStatus.valueOf(rs.getString("orderStatus")));
+            ServiceOrder order=new ServiceOrder(orderId,customer,vehicle,
+                    OrderStatus.valueOf(rs.getString("orderStatus")),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    (rs.getTimestamp("started_at")!=null)?rs.getTimestamp("started_at").toLocalDateTime():null,
+                    (rs.getTimestamp("completed_at")!=null)?rs.getTimestamp("completed_at").toLocalDateTime():null,
+                    (rs.getTimestamp("cancelled_at")!=null)?rs.getTimestamp("cancelled_at").toLocalDateTime():null);
             return order;
         }
         catch (Exception e){
             throw new IllegalArgumentException(e);
         }
     }
-    public void updateStatus(Connection con,String orderId, OrderStatus orderStatus){
-        String sql="UPDATE service_order SET orderStatus=? WHERE order_id=?";
+    public void updateStatus(Connection con,ServiceOrder order){
+        String sql = """
+                    UPDATE service_order SET orderStatus = ?,
+                     started_at = ?,
+                     completed_at = ?,
+                     cancelled_at = ?
+                     WHERE order_id = ?""";
         try (
              PreparedStatement ps=con.prepareStatement(sql)){
-            ps.setString(1,orderStatus.name());
-            ps.setString(2,orderId);
+            ps.setString(1,order.getOrderStatus().name());
+            ps.setTimestamp(2,(order.getStartedTime()!=null)?Timestamp.valueOf(order.getStartedTime()):null);
+            ps.setTimestamp(3,(order.getCompletedTime()!=null)?Timestamp.valueOf(order.getCompletedTime()):null);
+            ps.setTimestamp(4,(order.getCancelledTime()!=null)?Timestamp.valueOf(order.getCancelledTime()):null);
+            ps.setString(5,order.getOrderId());
             ps.executeUpdate();
 
         }

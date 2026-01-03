@@ -28,7 +28,16 @@ public class GarageService {
                 throw new DuplicateEntityException("ERROR: Customer with id=" + customer.getCustomerID() + " already exist");
             else customerDAO.save(con, customer);
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -55,7 +64,16 @@ public class GarageService {
                 throw new DuplicateEntityException("ERROR: Vehicle with Vehicle id=" + vehicle.getVehicleNumber() + " already exist");
             else vehicleDAO.save(con, vehicle);
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -88,10 +106,19 @@ public class GarageService {
             if (vehicle == null) {
                 throw new VehicleNotFoundException("ERROR: Vehicle with vehicle number=\"" + vehicleNumber + "\" doesn't exist.");
             }
-            ServiceOrder order = new ServiceOrder(orderId, customer, vehicle);
+            ServiceOrder order = ServiceOrder.createNew(orderId, customer, vehicle);
             serviceOrderDAO.save(con, order);
             con.commit();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -125,7 +152,16 @@ public class GarageService {
             order.addService(serviceItem, quantity);
             orderServiceItemDAO.saveService(con, order.getOrderId(), new OrderServiceItem(serviceItem, quantity));
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -152,7 +188,16 @@ public class GarageService {
             order.updateService(serviceItem, updatedQuantity);
             orderServiceItemDAO.updateService(con, order.getOrderId(), new OrderServiceItem(serviceItem, updatedQuantity));
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -179,7 +224,16 @@ public class GarageService {
             order.deleteService(serviceId);
             orderServiceItemDAO.deleteItem(con, order.getOrderId(), serviceId);
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -204,9 +258,18 @@ public class GarageService {
             con.setAutoCommit(false);
             ServiceOrder order = getOrder(con,order_id);
             order.startOrder();
-            serviceOrderDAO.updateStatus(con, order.getOrderId(), OrderStatus.IN_PROGRESS);
+            serviceOrderDAO.updateStatus(con, order);
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -231,9 +294,18 @@ public class GarageService {
             con.setAutoCommit(false);
             ServiceOrder order = getOrder(con,order_id);
             order.completeOrder();
-            serviceOrderDAO.updateStatus(con, order.getOrderId(), OrderStatus.COMPLETED);
+            serviceOrderDAO.updateStatus(con, order);
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -258,9 +330,18 @@ public class GarageService {
             con.setAutoCommit(false);
             ServiceOrder order = getOrder(con,order_id);
             order.cancelOrder();
-            serviceOrderDAO.updateStatus(con, order.getOrderId(), OrderStatus.CANCELLED);
+            serviceOrderDAO.updateStatus(con, order);
             con.commit();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -333,7 +414,16 @@ public class GarageService {
             customerDAO.updateNextId(con, "Customer", next);
             con.commit();
             return "C" + next;
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -361,7 +451,16 @@ public class GarageService {
             serviceOrderDAO.updateNextId(con, "ServiceOrder", next);
             con.commit();
             return "OD" + next;
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
@@ -389,7 +488,16 @@ public class GarageService {
             orderServiceItemDAO.updateNextId(con, "ServiceItem", next);
             con.commit();
             return "S" + next;
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw e;
+        }
+        catch (Exception e) {
             if (con != null) {
                 try {
                     con.rollback();
