@@ -15,10 +15,14 @@ public class ServiceOrder {
     private Vehicle vehicle;
     private List<OrderServiceItem> services;
     private OrderStatus orderStatus;
-    private LocalDateTime created_at;
+    private final LocalDateTime created_at;
     private LocalDateTime started_at;
     private LocalDateTime completed_at;
     private LocalDateTime cancelled_at;
+    private Double final_subtotal;
+    private Double final_discount;
+    private Double final_tax;
+    private Double final_amount;
 
     public ServiceOrder(String orderId, Customer customer, Vehicle vehicle,
                         OrderStatus orderStatus,
@@ -116,17 +120,20 @@ public class ServiceOrder {
         if(orderStatus==OrderStatus.IN_PROGRESS) {
             orderStatus = OrderStatus.COMPLETED;
             completed_at=LocalDateTime.now();
+            this.final_subtotal=getSubTotal();
+            this.final_discount=getDiscountAmount();
+            this.final_tax=getTaxAmount();
+            this.final_amount=getSubTotal()-getDiscountAmount()+getTaxAmount();
         }
         else {
             throw new InvalidOrderStateException("Warning: Order can only be completed from IN_PROGRESS state");
         }
     }
-    public double getTotalAmount(){
-        double total=0.0;
-        for(OrderServiceItem s:services){
-            total+=s.getTotalPrice();
+    public double getFinalAmount(){
+        if(orderStatus==OrderStatus.COMPLETED){
+            return final_amount;
         }
-        return total;
+        return getSubTotal()-getDiscountAmount()+getTaxAmount();
     }
 
     public String getOrderId() {
@@ -176,6 +183,68 @@ public class ServiceOrder {
     }
     public void loadService(OrderServiceItem item) {
         services.add(item);
+    }
+
+    public double getSubTotal() {
+        double total=0.0;
+        for(OrderServiceItem items:services){
+            total+=items.getTotalPrice();
+        }
+        return total;
+    }
+
+    public double getDiscountAmount(){
+        return 0.0;
+    }
+    public double getTaxAmount(){
+        return 0.0;
+    }
+
+    public void setFinal_subtotal(Double final_subtotal) {
+        this.final_subtotal = final_subtotal;
+    }
+
+    public void setFinal_discount(Double final_discount) {
+        this.final_discount = final_discount;
+    }
+
+    public void setFinal_tax(Double final_tax) {
+        this.final_tax = final_tax;
+    }
+
+    public void setFinal_amount(Double final_amount) {
+        this.final_amount = final_amount;
+    }
+    public double getFrozenSubtotal() {
+        return final_subtotal;
+    }
+
+    public double getFrozenDiscount() {
+        return final_discount;
+    }
+
+    public double getFrozenTax() {
+        return final_tax;
+    }
+    public double getBillSubtotal() {
+        if (orderStatus == OrderStatus.COMPLETED) {
+            return final_subtotal;
+        }
+        return getSubTotal();
+    }
+
+    public double getBillDiscount() {
+        if (orderStatus == OrderStatus.COMPLETED) {
+            return final_discount;
+        }
+        return getDiscountAmount();
+    }
+
+    public double getBillTax() {
+        if (orderStatus == OrderStatus.COMPLETED) {
+            return final_tax;
+        }
+        return getTaxAmount();
     }
 
 }

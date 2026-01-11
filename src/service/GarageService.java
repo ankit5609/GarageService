@@ -294,7 +294,7 @@ public class GarageService {
             con.setAutoCommit(false);
             ServiceOrder order = getOrder(con,order_id);
             order.completeOrder();
-            serviceOrderDAO.updateStatus(con, order);
+            serviceOrderDAO.completeOrder(con, order);
             con.commit();
         }catch (RuntimeException e) {
             if (con != null) {

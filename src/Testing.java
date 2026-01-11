@@ -1,77 +1,64 @@
-//import enums.OrderStatus;
-//import enums.VehicleType;
-//import exceptions.InvalidOrderStateException;
-//import model.Customer;
-//import model.ServiceItem;
-//import model.ServiceOrder;
-//import model.Vehicle;
-//
-//public class Testing {
-//    public void testStartAndCompleteOrder() {
-//        Customer c = new Customer("C1", "A", "999");
-//        Vehicle v = new Vehicle("V1", c, "Honda", VehicleType.CAR);
-//        ServiceOrder order = new ServiceOrder("O1", c, v);
-//
-//        order.addService(new ServiceItem("S1", "Oil Change", 500), 1);
-//        order.startOrder();
-//        order.completeOrder();
-//
-//        if (order.getOrderStatus() != OrderStatus.COMPLETED) {
-//            throw new RuntimeException("Order should be COMPLETED");
-//        }
-//    }
-//
-//    public void testStartOrderWithoutServiceShouldFail() {
-//        try {
-//            Customer c = new Customer("C1", "A", "999");
-//            Vehicle v = new Vehicle("V1", c, "Honda", VehicleType.CAR);
-//            ServiceOrder order = new ServiceOrder("O1", c, v);
-//
-//            order.startOrder();
-//
-//            throw new RuntimeException("Expected exception was not thrown");
-//        } catch (InvalidOrderStateException e) {
-//            // correct behavior
-//        }
-//    }
-//
-//    public void testAddServiceAfterStartShouldFail() {
-//        try {
-//            Customer c = new Customer("C1", "A", "999");
-//            Vehicle v = new Vehicle("V1", c, "Honda", VehicleType.CAR);
-//            ServiceOrder order = new ServiceOrder("O1", c, v);
-//
-//            order.addService(new ServiceItem("S1", "Oil", 500), 1);
-//            order.startOrder();
-//            order.addService(new ServiceItem("S2", "Wash", 200), 1);
-//
-//            throw new RuntimeException("Expected exception not thrown");
-//        } catch (InvalidOrderStateException e) {
-//            // correct
-//        }
-//    }
-//
-//    public void testTotalAmountCalculation() {
-//        Customer c = new Customer("C1", "A", "999");
-//        Vehicle v = new Vehicle("V1", c, "Honda", VehicleType.CAR);
-//        ServiceOrder order = new ServiceOrder("O1", c, v);
-//
-//        order.addService(new ServiceItem("S1", "Oil", 500), 2);
-//        order.addService(new ServiceItem("S2", "Wash", 200), 1);
-//
-//        double total = order.getTotalAmount();
-//
-//        if (total != 1200) {
-//            throw new RuntimeException("Total should be 1200 but was " + total);
-//        }
-//    }
-//    public static void main(String[] args) {
-//        Testing ob=new Testing();
-//        ob.testStartAndCompleteOrder();
-//        ob.testStartOrderWithoutServiceShouldFail();
-//        ob.testAddServiceAfterStartShouldFail();
-//        ob.testTotalAmountCalculation();
-//
-//        System.out.println("ALL TESTS PASSED");
-//    }
-//}
+import model.*;
+import enums.VehicleType;
+import service.GarageService;
+
+public class Testing {
+
+    public static void main(String[] args) {
+
+        GarageService service = new GarageService();
+
+        // ---------- SETUP ----------
+        String customerId = service.generateCustomerId();
+        service.addCustomer(new Customer(customerId, "Test User", "9999999999"));
+
+        service.addVehicle(new Vehicle(
+                "TEST123",
+                service.getCustomer(customerId),
+                "Honda",
+                VehicleType.CAR
+        ));
+
+        String orderId = service.generateOrderId();
+        service.createOrder(orderId, customerId, "TEST123");
+
+        // ---------- ADD SERVICES ----------
+        service.addServiceToOrder(orderId,
+                new ServiceItem(service.generateServiceItemId(), "Oil Change", 500),
+                1
+        );
+
+        service.addServiceToOrder(orderId,
+                new ServiceItem(service.generateServiceItemId(), "Brake Service", 800),
+                1
+        );
+
+        // ---------- START + COMPLETE ----------
+        service.startOrder(orderId);
+        service.completeOrder(orderId);
+
+        // ---------- FIRST BILL ----------
+        ServiceOrder firstLoad = service.getOrder(orderId);
+        Bill bill1 = new Bill("B1", firstLoad);
+
+        double firstAmount = firstLoad.getFinalAmount();
+        System.out.println("First total: " + firstAmount);
+
+        // ---------- SECOND LOAD (fresh from DB) ----------
+        ServiceOrder secondLoad = service.getOrder(orderId);
+        Bill bill2 = new Bill("B2", secondLoad);
+
+        double secondAmount = secondLoad.getFinalAmount();
+        System.out.println("Second total: " + secondAmount);
+
+        // ---------- ASSERT ----------
+        if (firstAmount != secondAmount) {
+            throw new AssertionError(
+                    "BUG: Final amount changed after reload! " +
+                            firstAmount + " vs " + secondAmount
+            );
+        }
+
+        System.out.println("TEST PASSED: Final amount is stable.");
+    }
+}

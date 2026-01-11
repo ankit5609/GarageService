@@ -17,7 +17,7 @@ public class Bill {
             throw new InvalidOrderStateException("ERROR: Order is not yet completed.");
         this.billID = billID;
         this.order = order;
-        amount= order.getTotalAmount();
+        amount= order.getFinalAmount();
     }
     public void printBill(){
         System.out.println("Bill ID: "+billID);
@@ -34,7 +34,10 @@ public class Bill {
                     existing.getTotalPrice()
             );        }
         System.out.println("----------------------------------------");
-        System.out.printf("Total Amount: %.2f%n", order.getTotalAmount());
+        System.out.printf("Sub Total Amount: %.2f%n", order.getBillSubtotal());
+        System.out.printf("Discount: %.2f%n", order.getBillDiscount());
+        System.out.printf("Tax: %.2f%n", order.getBillTax());
+        System.out.printf("Total Amount: %.2f%n", order.getFinalAmount());
     }
 
 }

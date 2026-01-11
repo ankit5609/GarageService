@@ -112,6 +112,10 @@ public class ServiceOrderDAO {
                     (rs.getTimestamp("started_at")!=null)?rs.getTimestamp("started_at").toLocalDateTime():null,
                     (rs.getTimestamp("completed_at")!=null)?rs.getTimestamp("completed_at").toLocalDateTime():null,
                     (rs.getTimestamp("cancelled_at")!=null)?rs.getTimestamp("cancelled_at").toLocalDateTime():null);
+            order.setFinal_subtotal(rs.getDouble("final_subtotal"));
+            order.setFinal_discount(rs.getDouble("final_discount"));
+            order.setFinal_tax(rs.getDouble("final_tax"));
+            order.setFinal_amount(rs.getDouble("final_amount"));
             return order;
         }
         catch (Exception e){
@@ -132,6 +136,10 @@ public class ServiceOrderDAO {
                     (rs.getTimestamp("started_at")!=null)?rs.getTimestamp("started_at").toLocalDateTime():null,
                     (rs.getTimestamp("completed_at")!=null)?rs.getTimestamp("completed_at").toLocalDateTime():null,
                     (rs.getTimestamp("cancelled_at")!=null)?rs.getTimestamp("cancelled_at").toLocalDateTime():null);
+            order.setFinal_subtotal(rs.getDouble("final_subtotal"));
+            order.setFinal_discount(rs.getDouble("final_discount"));
+            order.setFinal_tax(rs.getDouble("final_tax"));
+            order.setFinal_amount(rs.getDouble("final_amount"));
             return order;
         }
         catch (Exception e){
@@ -152,6 +160,32 @@ public class ServiceOrderDAO {
             ps.setTimestamp(3,(order.getCompletedTime()!=null)?Timestamp.valueOf(order.getCompletedTime()):null);
             ps.setTimestamp(4,(order.getCancelledTime()!=null)?Timestamp.valueOf(order.getCancelledTime()):null);
             ps.setString(5,order.getOrderId());
+            ps.executeUpdate();
+
+        }
+        catch (Exception e){
+            throw new IllegalArgumentException(e);
+        }
+    }
+    public void completeOrder(Connection con,ServiceOrder order){
+        String sql = """
+                    UPDATE service_order SET 
+                    orderStatus = ?,
+                    final_subtotal=?,
+                    final_discount=?,
+                    final_tax=?,
+                    final_amount=?,
+                    completed_at =?
+                    WHERE order_id = ?""";
+        try (
+                PreparedStatement ps=con.prepareStatement(sql)){
+            ps.setString(1,order.getOrderStatus().name());
+            ps.setDouble(2,order.getSubTotal());
+            ps.setDouble(3,order.getDiscountAmount());
+            ps.setDouble(4,order.getTaxAmount());
+            ps.setDouble(5,order.getFinalAmount());
+            ps.setTimestamp(6,(order.getCompletedTime()!=null)?Timestamp.valueOf(order.getCompletedTime()):null);
+            ps.setString(7,order.getOrderId());
             ps.executeUpdate();
 
         }
