@@ -286,6 +286,59 @@ public class GarageService {
             }
         }
     }
+    public void applyDiscount(String orderId, double percentage) {
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false);
+
+            ServiceOrder order = getOrder(con, orderId);
+            order.applyDiscountPercentage(percentage);
+            serviceOrderDAO.updatePricingRules(con, order);
+            con.commit();
+        } catch (RuntimeException e) {
+            if (con != null) try { con.rollback(); } catch (Exception ignored) {}
+            throw e;
+        }
+        catch (Exception e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw new RuntimeException(e);
+        }finally {
+            if (con != null) try { con.close(); } catch (Exception ignored) {}
+        }
+    }
+
+    public void applyTax(String orderId, double percentage) {
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false);
+
+            ServiceOrder order = getOrder(con, orderId);
+            order.applyTaxPercentage(percentage);
+            serviceOrderDAO.updatePricingRules(con, order);
+            con.commit();
+        } catch (RuntimeException e) {
+            if (con != null) try { con.rollback(); } catch (Exception ignored) {}
+            throw e;
+        }
+        catch (Exception e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignored) {
+                }
+            }
+            throw new RuntimeException(e);
+        }finally {
+            if (con != null) try { con.close(); } catch (Exception ignored) {}
+        }
+    }
 
     public void completeOrder(String order_id) {
         Connection con = null;

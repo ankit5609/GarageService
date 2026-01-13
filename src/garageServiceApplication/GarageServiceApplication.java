@@ -23,8 +23,10 @@ public class GarageServiceApplication {
             System.out.println("7. Start the order");
             System.out.println("8. Complete the order");
             System.out.println("9. Cancel Order");
-            System.out.println("10. Print Bill");
-            System.out.println("11. EXIT");
+            System.out.println("10. Apply Discount");
+            System.out.println("11. Apply Tax");
+            System.out.println("12. Print Bill");
+            System.out.println("13. EXIT");
             System.out.println("Choose from above options");
             int choice=sc.nextInt();
             sc.nextLine();
@@ -119,15 +121,32 @@ public class GarageServiceApplication {
                         garageService.cancelOrder(orderId);
                         System.out.println("Order cancelled.");
                         break;
-
                     case 10:
+                        System.out.print("Order ID: ");
+                        orderId = sc.nextLine();
+                        System.out.print("Discount percentage: ");
+                        double discount = sc.nextDouble();
+                        sc.nextLine();
+                        garageService.applyDiscount(orderId, discount);
+                        System.out.println("Discount applied");
+                        break;
+                    case 11:
+                        System.out.print("Order ID: ");
+                        orderId = sc.nextLine();
+                        System.out.print("Tax percentage: ");
+                        double tax = sc.nextDouble();
+                        sc.nextLine();
+                        garageService.applyTax(orderId, tax);
+                        System.out.println("Tax applied");
+                        break;
+                    case 12:
                         System.out.print("Order ID: ");
                         orderId=sc.nextLine();
                         ServiceOrder currentOrder=garageService.getOrder(orderId);
                         Bill bill = new Bill("B" + currentOrder.getOrderId(), currentOrder);
                         bill.printBill();
                         break;
-                    case 11:
+                    case 13:
                         System.out.println("EXITING.......");
                         sc.close();
                         return;

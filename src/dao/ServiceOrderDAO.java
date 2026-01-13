@@ -140,6 +140,11 @@ public class ServiceOrderDAO {
             order.setFinal_discount(rs.getDouble("final_discount"));
             order.setFinal_tax(rs.getDouble("final_tax"));
             order.setFinal_amount(rs.getDouble("final_amount"));
+            order.restorePricingRules(
+                    rs.getDouble("discount_percentage"),
+                    rs.getDouble("tax_percentage")
+            );
+
             return order;
         }
         catch (Exception e){
@@ -167,6 +172,22 @@ public class ServiceOrderDAO {
             throw new IllegalArgumentException(e);
         }
     }
+    public void updatePricingRules(Connection con, ServiceOrder order) {
+        String sql = """
+        UPDATE service_order
+        SET discount_percentage = ?, tax_percentage = ?
+        WHERE order_id = ?
+        """;
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDouble(1, order.getDiscountPercentage());
+            ps.setDouble(2, order.getTaxPercentage());
+            ps.setString(3, order.getOrderId());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void completeOrder(Connection con,ServiceOrder order){
         String sql = """
                     UPDATE service_order SET 
@@ -236,4 +257,5 @@ public class ServiceOrderDAO {
             throw new IllegalArgumentException(e);
         }
     }
+
 }

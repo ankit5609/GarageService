@@ -20,6 +20,8 @@ public class ServiceOrder {
     private LocalDateTime completed_at;
     private LocalDateTime cancelled_at;
     private Double final_subtotal;
+    private double discountPercentage;
+    private double taxPercentage;
     private Double final_discount;
     private Double final_tax;
     private Double final_amount;
@@ -38,6 +40,8 @@ public class ServiceOrder {
         this.started_at=started_at;
         this.completed_at=completed_at;
         this.cancelled_at=cancelled_at;
+        discountPercentage=0.0;
+        taxPercentage=0.0;
     }
 
     public static ServiceOrder createNew(String order_id,Customer customer,Vehicle vehicle){
@@ -129,6 +133,35 @@ public class ServiceOrder {
             throw new InvalidOrderStateException("Warning: Order can only be completed from IN_PROGRESS state");
         }
     }
+    public void applyDiscountPercentage(double percentage) {
+        if (orderStatus != OrderStatus.CREATED)
+            throw new InvalidOrderStateException("Discount can only be applied before order starts");
+        if (percentage < 0 || percentage > 100)
+            throw new IllegalArgumentException("Invalid discount percentage");
+        this.discountPercentage = percentage;
+    }
+
+    public double getDiscountPercentage() {
+        return discountPercentage;
+    }
+
+    public double getTaxPercentage() {
+        return taxPercentage;
+    }
+
+    public void applyTaxPercentage(double percentage) {
+        if (orderStatus == OrderStatus.COMPLETED)
+            throw new InvalidOrderStateException("Cannot modify tax after completion");
+        if (percentage < 0 || percentage > 100)
+            throw new IllegalArgumentException("Invalid tax percentage");
+        this.taxPercentage = percentage;
+    }
+    public void restorePricingRules(double discountPct, double taxPct) {
+        this.discountPercentage = discountPct;
+        this.taxPercentage = taxPct;
+    }
+
+
     public double getFinalAmount(){
         if(orderStatus==OrderStatus.COMPLETED){
             return final_amount;
@@ -194,11 +227,14 @@ public class ServiceOrder {
     }
 
     public double getDiscountAmount(){
-        return 0.0;
+        double subtotal = getSubTotal();
+        return subtotal * (discountPercentage / 100.0);
     }
-    public double getTaxAmount(){
-        return 0.0;
+    public double getTaxAmount() {
+        double taxableAmount = getSubTotal() - getDiscountAmount();
+        return taxableAmount * (taxPercentage / 100.0);
     }
+
 
     public void setFinal_subtotal(Double final_subtotal) {
         this.final_subtotal = final_subtotal;
