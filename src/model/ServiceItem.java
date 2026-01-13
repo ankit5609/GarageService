@@ -1,11 +1,13 @@
 package model;
 
+import java.math.BigDecimal;
+
 public class ServiceItem {
     private String serviceID;
     private String serviceName;
-    private double price;
+    private BigDecimal price;
 
-    public ServiceItem(String serviceID, String serviceName, double price) {
+    public ServiceItem(String serviceID, String serviceName, BigDecimal price) {
         this.serviceID = serviceID;
         this.serviceName = serviceName;
         this.price = price;
@@ -19,7 +21,7 @@ public class ServiceItem {
         return serviceName;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 }

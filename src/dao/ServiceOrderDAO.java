@@ -112,10 +112,10 @@ public class ServiceOrderDAO {
                     (rs.getTimestamp("started_at")!=null)?rs.getTimestamp("started_at").toLocalDateTime():null,
                     (rs.getTimestamp("completed_at")!=null)?rs.getTimestamp("completed_at").toLocalDateTime():null,
                     (rs.getTimestamp("cancelled_at")!=null)?rs.getTimestamp("cancelled_at").toLocalDateTime():null);
-            order.setFinal_subtotal(rs.getDouble("final_subtotal"));
-            order.setFinal_discount(rs.getDouble("final_discount"));
-            order.setFinal_tax(rs.getDouble("final_tax"));
-            order.setFinal_amount(rs.getDouble("final_amount"));
+            order.setFinal_subtotal(rs.getBigDecimal("final_subtotal"));
+            order.setFinal_discount(rs.getBigDecimal("final_discount"));
+            order.setFinal_tax(rs.getBigDecimal("final_tax"));
+            order.setFinal_amount(rs.getBigDecimal("final_amount"));
             return order;
         }
         catch (Exception e){
@@ -136,10 +136,10 @@ public class ServiceOrderDAO {
                     (rs.getTimestamp("started_at")!=null)?rs.getTimestamp("started_at").toLocalDateTime():null,
                     (rs.getTimestamp("completed_at")!=null)?rs.getTimestamp("completed_at").toLocalDateTime():null,
                     (rs.getTimestamp("cancelled_at")!=null)?rs.getTimestamp("cancelled_at").toLocalDateTime():null);
-            order.setFinal_subtotal(rs.getDouble("final_subtotal"));
-            order.setFinal_discount(rs.getDouble("final_discount"));
-            order.setFinal_tax(rs.getDouble("final_tax"));
-            order.setFinal_amount(rs.getDouble("final_amount"));
+            order.setFinal_subtotal(rs.getBigDecimal("final_subtotal"));
+            order.setFinal_discount(rs.getBigDecimal("final_discount"));
+            order.setFinal_tax(rs.getBigDecimal("final_tax"));
+            order.setFinal_amount(rs.getBigDecimal("final_amount"));
             order.restorePricingRules(
                     rs.getDouble("discount_percentage"),
                     rs.getDouble("tax_percentage")
@@ -201,10 +201,10 @@ public class ServiceOrderDAO {
         try (
                 PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,order.getOrderStatus().name());
-            ps.setDouble(2,order.getSubTotal());
-            ps.setDouble(3,order.getDiscountAmount());
-            ps.setDouble(4,order.getTaxAmount());
-            ps.setDouble(5,order.getFinalAmount());
+            ps.setBigDecimal(2,order.getSubTotal());
+            ps.setBigDecimal(3,order.getDiscountAmount());
+            ps.setBigDecimal(4,order.getTaxAmount());
+            ps.setBigDecimal(5,order.getFinalAmount());
             ps.setTimestamp(6,(order.getCompletedTime()!=null)?Timestamp.valueOf(order.getCompletedTime()):null);
             ps.setString(7,order.getOrderId());
             ps.executeUpdate();

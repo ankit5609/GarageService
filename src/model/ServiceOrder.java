@@ -5,6 +5,8 @@ import exceptions.DuplicateEntityException;
 import exceptions.InvalidOrderStateException;
 import exceptions.ServiceNotFoundException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +21,12 @@ public class ServiceOrder {
     private LocalDateTime started_at;
     private LocalDateTime completed_at;
     private LocalDateTime cancelled_at;
-    private Double final_subtotal;
+    private BigDecimal final_subtotal;
     private double discountPercentage;
     private double taxPercentage;
-    private Double final_discount;
-    private Double final_tax;
-    private Double final_amount;
+    private BigDecimal final_discount;
+    private BigDecimal final_tax;
+    private BigDecimal final_amount;
 
     public ServiceOrder(String orderId, Customer customer, Vehicle vehicle,
                         OrderStatus orderStatus,
@@ -127,7 +129,12 @@ public class ServiceOrder {
             this.final_subtotal=getSubTotal();
             this.final_discount=getDiscountAmount();
             this.final_tax=getTaxAmount();
-            this.final_amount=getSubTotal()-getDiscountAmount()+getTaxAmount();
+            this.final_amount=getSubTotal().subtract(getDiscountAmount()).add(getTaxAmount());
+            this.final_amount = this.final_amount.setScale(2, RoundingMode.HALF_UP);
+            this.final_subtotal = this.final_subtotal.setScale(2, RoundingMode.HALF_UP);
+            this.final_discount = this.final_discount.setScale(2, RoundingMode.HALF_UP);
+            this.final_tax = this.final_tax.setScale(2, RoundingMode.HALF_UP);
+
         }
         else {
             throw new InvalidOrderStateException("Warning: Order can only be completed from IN_PROGRESS state");
@@ -162,11 +169,11 @@ public class ServiceOrder {
     }
 
 
-    public double getFinalAmount(){
+    public BigDecimal getFinalAmount(){
         if(orderStatus==OrderStatus.COMPLETED){
             return final_amount;
         }
-        return getSubTotal()-getDiscountAmount()+getTaxAmount();
+        return getSubTotal().subtract(getDiscountAmount()).add(getTaxAmount());
     }
 
     public String getOrderId() {
@@ -218,65 +225,70 @@ public class ServiceOrder {
         services.add(item);
     }
 
-    public double getSubTotal() {
-        double total=0.0;
-        for(OrderServiceItem items:services){
-            total+=items.getTotalPrice();
+    public BigDecimal getSubTotal() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (OrderServiceItem item : services) {
+            total = total.add(item.getTotalPrice());
         }
         return total;
     }
 
-    public double getDiscountAmount(){
-        double subtotal = getSubTotal();
-        return subtotal * (discountPercentage / 100.0);
+    public BigDecimal getDiscountAmount() {
+        return getSubTotal()
+                .multiply(BigDecimal.valueOf(discountPercentage))
+                .divide(BigDecimal.valueOf(100));
     }
-    public double getTaxAmount() {
-        double taxableAmount = getSubTotal() - getDiscountAmount();
-        return taxableAmount * (taxPercentage / 100.0);
+
+    public BigDecimal getTaxAmount() {
+        BigDecimal taxable = getSubTotal().subtract(getDiscountAmount());
+        return taxable
+                .multiply(BigDecimal.valueOf(taxPercentage))
+                .divide(BigDecimal.valueOf(100));
     }
 
 
-    public void setFinal_subtotal(Double final_subtotal) {
+
+    public void setFinal_subtotal(BigDecimal final_subtotal) {
         this.final_subtotal = final_subtotal;
     }
 
-    public void setFinal_discount(Double final_discount) {
+    public void setFinal_discount(BigDecimal final_discount) {
         this.final_discount = final_discount;
     }
 
-    public void setFinal_tax(Double final_tax) {
+    public void setFinal_tax(BigDecimal final_tax) {
         this.final_tax = final_tax;
     }
 
-    public void setFinal_amount(Double final_amount) {
+    public void setFinal_amount(BigDecimal final_amount) {
         this.final_amount = final_amount;
     }
-    public double getFrozenSubtotal() {
+    public BigDecimal getFrozenSubtotal() {
         return final_subtotal;
     }
 
-    public double getFrozenDiscount() {
+    public BigDecimal getFrozenDiscount() {
         return final_discount;
     }
 
-    public double getFrozenTax() {
+    public BigDecimal getFrozenTax() {
         return final_tax;
     }
-    public double getBillSubtotal() {
+    public BigDecimal getBillSubtotal() {
         if (orderStatus == OrderStatus.COMPLETED) {
             return final_subtotal;
         }
         return getSubTotal();
     }
 
-    public double getBillDiscount() {
+    public BigDecimal getBillDiscount() {
         if (orderStatus == OrderStatus.COMPLETED) {
             return final_discount;
         }
         return getDiscountAmount();
     }
 
-    public double getBillTax() {
+    public BigDecimal getBillTax() {
         if (orderStatus == OrderStatus.COMPLETED) {
             return final_tax;
         }

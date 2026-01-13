@@ -3,12 +3,13 @@ package model;
 import enums.OrderStatus;
 import exceptions.InvalidOrderStateException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class Bill {
     private String billID;
     private ServiceOrder order;
-    private double amount;
+    private BigDecimal amount;
 
     public Bill(String billID, ServiceOrder order) {
         if(order.getOrderStatus()== OrderStatus.CANCELLED)
@@ -37,7 +38,7 @@ public class Bill {
         System.out.printf("Sub Total Amount: %.2f%n", order.getBillSubtotal());
         System.out.printf("Discount: %.2f%n", order.getBillDiscount());
         System.out.printf("Tax: %.2f%n", order.getBillTax());
-        System.out.printf("Total Amount: %.2f%n", order.getFinalAmount());
+        System.out.println("Total Amount: " + order.getFinalAmount());
     }
 
 }

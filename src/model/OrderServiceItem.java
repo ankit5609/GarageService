@@ -1,5 +1,7 @@
 package model;
 
+import java.math.BigDecimal;
+
 public class OrderServiceItem {
     private ServiceItem serviceItem;
     private int quantity;
@@ -25,7 +27,8 @@ public class OrderServiceItem {
         this.quantity = quantity;
     }
 
-    public double getTotalPrice(){
-        return serviceItem.getPrice()*quantity;
+    public BigDecimal getTotalPrice() {
+        return serviceItem.getPrice().multiply(BigDecimal.valueOf(quantity));
     }
+
 }

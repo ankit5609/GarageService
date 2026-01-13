@@ -4,6 +4,8 @@ import enums.VehicleType;
 import model.*;
 import service.GarageService;
 
+import java.math.BigDecimal;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class GarageServiceApplication {
@@ -28,7 +30,13 @@ public class GarageServiceApplication {
             System.out.println("12. Print Bill");
             System.out.println("13. EXIT");
             System.out.println("Choose from above options");
-            int choice=sc.nextInt();
+            int choice;
+            try {
+                choice = sc.nextInt();
+            }
+            catch (Exception e){
+                choice=14;
+            }
             sc.nextLine();
             try{
                 switch (choice) {
@@ -75,7 +83,7 @@ public class GarageServiceApplication {
                         int quantity=sc.nextInt();
                         sc.nextLine();
                         garageService.addServiceToOrder(orderId,
-                                new ServiceItem(sID,sName,price),quantity);
+                                new ServiceItem(sID,sName, BigDecimal.valueOf(price)),quantity);
                         System.out.println("Service added");
                         break;
                     case 5:
@@ -100,7 +108,7 @@ public class GarageServiceApplication {
                         int quantitY=sc.nextInt();
                         sc.nextLine();
                         garageService.updateServiceInOrder(orderId,
-                                new ServiceItem(sID,Sname,Price),quantitY);
+                                new ServiceItem(sID,Sname,BigDecimal.valueOf(Price)),quantitY);
                         System.out.println("Service Updated");
                         break;
                     case 7:
@@ -153,6 +161,10 @@ public class GarageServiceApplication {
                     default:
                         System.out.println("Enter valid choice from 1-11");
                 }
+            }
+            catch (InputMismatchException e) {
+                System.out.println("Invalid input type.");
+                sc.nextLine();
             }
             catch(RuntimeException e){
                 System.out.println(e.getMessage());

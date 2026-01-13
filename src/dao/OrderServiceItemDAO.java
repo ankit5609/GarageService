@@ -45,7 +45,7 @@ public class OrderServiceItemDAO {
             ps.setString(1,orderID);
             ps.setString(2,serviceItem.getServiceItem().getServiceID());
             ps.setString(3,serviceItem.getServiceItem().getServiceName());
-            ps.setDouble(4,serviceItem.getServiceItem().getPrice());
+            ps.setBigDecimal(4,serviceItem.getServiceItem().getPrice());
             ps.setInt(5,serviceItem.getQuantity());
             ps.executeUpdate();
         }
@@ -58,7 +58,7 @@ public class OrderServiceItemDAO {
         try (
              PreparedStatement ps=con.prepareStatement(sql)){
             ps.setString(1,serviceItem.getServiceItem().getServiceName());
-            ps.setDouble(2,serviceItem.getServiceItem().getPrice());
+            ps.setBigDecimal(2,serviceItem.getServiceItem().getPrice());
             ps.setInt(3,serviceItem.getQuantity());
             ps.setString(4,orderId);
             ps.setString(5,serviceItem.getServiceItem().getServiceID());
@@ -96,7 +96,7 @@ public class OrderServiceItemDAO {
             while(rs.next()){
                 ServiceItem serviceItem=new ServiceItem(rs.getString("serviceID"),
                         rs.getString("serviceName"),
-                        rs.getDouble("price"));
+                        rs.getBigDecimal("price"));
 
                 services.add(new OrderServiceItem(serviceItem,rs.getInt("quantity")));
             }
@@ -117,7 +117,7 @@ public class OrderServiceItemDAO {
             while(rs.next()){
                 ServiceItem serviceItem=new ServiceItem(rs.getString("serviceID"),
                         rs.getString("serviceName"),
-                        rs.getDouble("price"));
+                        rs.getBigDecimal("price"));
 
                 services.add(new OrderServiceItem(serviceItem,rs.getInt("quantity")));
             }
